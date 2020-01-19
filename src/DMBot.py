@@ -1,7 +1,7 @@
 import discord
 import asyncio
 from Queue import Queue
-from BotUtils import parse_question, create_permit_embed_public, create_permit_embed_private, parse_command_permit, parse_command_reject
+from BotUtils import parse_question, create_permit_embed_public, create_permit_embed_private, parse_command_permit, parse_command_reject, get_config_information
 import logging
 
 logger = logging.getLogger('discord')
@@ -13,6 +13,8 @@ logger.addHandler(handler)
 question_id = 1
 question_queue = Queue()
 
+config_data = get_config_information()
+
 class my_client(discord.Client):
 
     def __init__(self, id, queue):
@@ -20,18 +22,18 @@ class my_client(discord.Client):
         self.id = id
         self.queue = queue  
 
-    def get_question_channel(self):
+    def get_question_channel(self, guild, question_channel):
         '''
         Return (Discord Channel): return the correct discord channel
         '''
-        channel = discord.utils.get(self.get_all_channels(), guild__name='Bot_Tester', name='anonymous_questions')
+        channel = discord.utils.get(self.get_all_channels(), guild__name=guild, name=question_channel)
         return channel
 
-    def get_review_channel(self):
+    def get_review_channel(self, guild, review_channel):
         '''
         Return (Discord Channel): return the correct discord channel
         '''
-        channel = discord.utils.get(self.get_all_channels(), guild__name='Bot_Tester', name='question_review')
+        channel = discord.utils.get(self.get_all_channels(), guild__name=guild, name=review_channel)
         return channel
     
     async def handle_message(self, message):
@@ -71,8 +73,8 @@ class my_client(discord.Client):
 
     async def on_ready(self):
         print('Logged on as {0}!'.format(self.user))
-        self.review_channel = self.get_review_channel()
-        self.question_channel = self.get_question_channel()
+        self.review_channel = self.get_review_channel(config_data["guild_name"], config_data["review_channel"])
+        self.question_channel = self.get_question_channel(config_data["guild_name"], config_data["question_channel"])
 
     async def on_message(self, message):
        await self.handle_message(message)
@@ -80,9 +82,9 @@ class my_client(discord.Client):
 def main():
     client = my_client(question_id, question_queue)
 
-    with open("/home/personal-information/DMBot/src/key.txt", "r") as file_data:
-        BOT_KEY = file_data.read()
-
+    with open(config_data["key_path"], "r") as file_data:
+        BOT_KEY = file_data.readline()
+        
     client.run(BOT_KEY)
 
 if __name__ == "__main__":

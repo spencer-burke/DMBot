@@ -84,3 +84,35 @@ def create_permit_embed_public(question):
     result_embed.set_author(name="DMBot")
     result_embed.add_field(name="Question", value=str(question["content"]), inline=False)
     return result_embed
+
+def get_config_information():
+    '''
+    Return (dict): the dictionary containing all of the information gathered from the configuration file
+    
+    Return (None): returns None if the config file is not found
+    '''
+    try:
+        with open("t_config.txt", "r") as conf_text:
+            key_path = conf_text.readline()
+            #slice the the keypath to make sure there is no newline character
+            key_path = key_path[0:len(key_path)-1]
+
+            guild_name = conf_text.readline()
+            guild_name = guild_name[0:len(guild_name)-1]
+
+            review_channel = conf_text.readline()
+            review_channel = review_channel[0:len(review_channel)-1]
+
+            question_channel = conf_text.readline()
+            question_channel = question_channel[0:len(question_channel)-1]
+
+            conf_dict = {
+                "key_path": key_path,
+                "guild_name": guild_name,
+                "review_channel": review_channel,
+                "question_channel": question_channel
+            }
+            return conf_dict
+    except FileNotFoundError:
+        return None
+        
