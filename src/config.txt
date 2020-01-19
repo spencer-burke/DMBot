@@ -1,0 +1,4 @@
+{insert path to key}
+{insert guild name}
+{insert review channel}
+{insert question channel}
